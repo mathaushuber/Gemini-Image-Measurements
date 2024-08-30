@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: db_teste_shopper
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: gQCmJhqr6fwo6OJ
+      MYSQL_DATABASE: water_gas_db
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./src/migrations:/docker-entrypoint-initdb.d
+    command: --init-file /docker-entrypoint-initdb.d/001-create-measurements.sql
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: gQCmJhqr6fwo6OJ
+      DB_NAME: water_gas_db
+      DB_PORT: 3306
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      MODE: ${MODE:-dev}
+    container_name: app_teste_shopper
+    depends_on:
+      - db
+    restart: always
+
+volumes:
+  db_data:
